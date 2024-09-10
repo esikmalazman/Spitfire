@@ -5,6 +5,14 @@
 //  Created by seanmcneil on 8/17/19.
 //
 
+#if os(iOS) || os(watchOS) || os(tvOS)
+import UIKit
+public typealias PlatformImage = UIImage
+#elseif os(OSX)
+import Cocoa
+public typealias PlatformImage = NSImage
+#endif
+
 import AVFoundation
 
 final class Writer {
@@ -34,7 +42,7 @@ final class Writer {
     ///   - images: [UIImage] for creating video
     ///   - videoData: Contains information for configuring video
     ///   - delegate: Delegate to handle status updates
-    func write(images: [UIImage],
+    func write(images: [PlatformImage],
                videoData: VideoData,
                delegate: SpitfireDelegate?) {
         videoWriter.startSession(atSourceTime: .zero)
@@ -54,7 +62,7 @@ final class Writer {
     ///   - images: [UIImage] for creating video
     ///   - videoData: Contains information for configuring video
     ///   - delegate: Delegate to handle status updates
-    private func writeFrames(images: [UIImage],
+    private func writeFrames(images: [PlatformImage],
                              videoData: VideoData,
                              delegate: SpitfireDelegate?) {
         let frameDuration = CMTimeMake(value: 1, timescale: videoData.fps)
@@ -101,7 +109,7 @@ final class Writer {
     ///   - delegate: Delegate to handle status updates
     /// - Returns: Bool that indicates if operation was successful
     private func append(pixelBufferAdaptor adaptor: AVAssetWriterInputPixelBufferAdaptor,
-                        with image: inout UIImage,
+                        with image: inout PlatformImage,
                         at presentationTime: CMTime,
                         delegate: SpitfireDelegate?) -> Bool {
         if let pixelBufferPool = adaptor.pixelBufferPool {
@@ -138,7 +146,7 @@ final class Writer {
     ///   - buffer: Memory storage for pixel buffer, passed in by reference
     ///   - image: UIImage to write, passed in by reference
     private func fill(pixelBuffer buffer: inout CVPixelBuffer,
-                      with image: inout UIImage) {
+                      with image: inout PlatformImage) {
         CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
         
         guard let context = CGContext(
@@ -148,49 +156,13 @@ final class Writer {
             bitsPerComponent: 8,
             bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue),
-            let cgImage = image.cgImage else {
-                return
-        }
+            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue) else {return}
         
-        var transform: CGAffineTransform = CGAffineTransform.identity
+        let transform: CGAffineTransform = CGAffineTransform.identity
         
-        switch image.imageOrientation {
-        case .down, .downMirrored:
-            transform = transform.translatedBy(x: image.size.width, y: image.size.height)
-            transform = transform.rotated(by: CGFloat.pi)
-        case .left, .leftMirrored:
-            transform = transform.translatedBy(x: image.size.width, y: 0)
-            transform = transform.rotated(by: CGFloat.pi / 2.0)
-        case .right, .rightMirrored:
-            transform = transform.translatedBy(x: 0, y: image.size.height)
-            transform = transform.rotated(by: CGFloat.pi / -2.0)
-        case .up, .upMirrored:
-            break
-        @unknown default:
-            break
-        }
-      
-        switch image.imageOrientation {
-        case .upMirrored, .downMirrored:
-            transform = transform.translatedBy(x: image.size.width, y: 0)
-            transform = transform.scaledBy(x: -1, y: 1)
-        case .leftMirrored, .rightMirrored:
-            transform = transform.translatedBy(x: image.size.height, y: 0)
-            transform = transform.scaledBy(x: -1, y: 1)
-        case .up, .down, .left, .right:
-            break
-        @unknown default:
-            break
-        }
-        
-        context.concatenate(transform)
-        
-        switch image.imageOrientation {
-        case .left, .leftMirrored, .right, .rightMirrored:
+        if let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+            context.concatenate(transform)
             context.draw(cgImage, in: CGRect(x: 0, y: 0, width: image.size.height, height: image.size.width))
-        default:
-            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height))
         }
         
         CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
