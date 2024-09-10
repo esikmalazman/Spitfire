@@ -153,7 +153,7 @@ final class Writer {
         let transform: CGAffineTransform = CGAffineTransform.identity
         
             context.concatenate(transform)
-            context.draw(image, in: CGRect(x: 0, y: 0, width: image.size.height, height: image.size.width))
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height))
         
         
         CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
