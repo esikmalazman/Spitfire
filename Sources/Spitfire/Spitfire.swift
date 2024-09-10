@@ -7,12 +7,6 @@
 
 import AVFoundation
 
-#if canImport(UIKit)
-public typealias PlatformImage = UIImage
-#elseif canImport(OSX)
-public typealias PlatformImage = NSImage
-#endif
-
 public protocol SpitfireDelegate: AnyObject {
     func videoProgress(progress: Progress)
     func videoCompleted(url: URL)
@@ -44,7 +38,7 @@ public class Spitfire {
     /// - Parameters:
     ///   - images: [UIimage], all images must be the same size
     ///   - fps: Framerate, default value is 30 & must be 1...60
-    public func makeVideo(with images: [PlatformImage],
+    public func makeVideo(with images: [CGImage],
                           fps: Int32 = 30) {
         guard let size = images.first?.size else {
             delegate?.videoFailed(error: .imageArrayEmpty)
