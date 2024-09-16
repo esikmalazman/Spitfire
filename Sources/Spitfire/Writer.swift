@@ -51,7 +51,7 @@ final class Writer {
     /// Handles writing of frames to video file
     ///
     /// - Parameters:
-    ///   - images: [UIImage] for creating video
+    ///   - images: [CGImage] for creating video
     ///   - videoData: Contains information for configuring video
     ///   - delegate: Delegate to handle status updates
     private func writeFrames(images: [CGImage],
@@ -71,7 +71,7 @@ final class Writer {
                
                 guard image.size == videoData.size else {
                     delegate?.videoFailed(error: .imageDimensionsMatchFailure)
-                    
+                    print("Image Size : \(image.size), Video Data Size: \(videoData.size)")
                     return
                 }
                 
@@ -96,7 +96,7 @@ final class Writer {
     ///
     /// - Parameters:
     ///   - adaptor: Provides interface for appending samples to AVAssetWriterInput
-    ///   - image: UIImage to write, passed in by reference
+    ///   - image: CGImage to write, passed in by reference
     ///   - presentationTime: Time value for marking position in video
     ///   - delegate: Delegate to handle status updates
     /// - Returns: Bool that indicates if operation was successful
@@ -136,7 +136,7 @@ final class Writer {
     ///
     /// - Parameters:
     ///   - buffer: Memory storage for pixel buffer, passed in by reference
-    ///   - image: UIImage to write, passed in by reference
+    ///   - image: CGImage to write, passed in by reference
     private func fill(pixelBuffer buffer: inout CVPixelBuffer,
                       with image: inout CGImage) {
         CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
@@ -153,7 +153,7 @@ final class Writer {
         let transform: CGAffineTransform = CGAffineTransform.identity
         
             context.concatenate(transform)
-            context.draw(image, in: CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height))
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
         
         
         CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))

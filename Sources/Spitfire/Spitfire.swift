@@ -36,11 +36,11 @@ public class Spitfire {
     /// Performs creation of video from provided images
     ///
     /// - Parameters:
-    ///   - images: [UIimage], all images must be the same size
+    ///   - images: [CGimage], all images must be the same size
     ///   - fps: Framerate, default value is 30 & must be 1...60
     public func makeVideo(with images: [CGImage],
                           fps: Int32 = 30) {
-        guard let size = images.first?.size else {
+        guard let image = images.first else {
             delegate?.videoFailed(error: .imageArrayEmpty)
             
             return
@@ -52,6 +52,8 @@ public class Spitfire {
             
             return
         }
+        
+        let size = CGSize(width: image.width, height: image.height)
         
         guard size.width.truncatingRemainder(dividingBy: 16.0) == 0 else {
             let message = NSLocalizedString("Image width must be divisble by 16", comment: "")
