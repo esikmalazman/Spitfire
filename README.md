@@ -110,7 +110,7 @@ public enum SpitfireError: Swift.Error {
 
 ## Credits
 
-This work is based off of work originally performed by [acj](https://gist.github.com/acj) which can be found [here](https://gist.github.com/acj/6ae90aa1ebb8cad6b47b).
+This work is based on work adopted from [seanmcneil](https://github.com/seanmcneil/Spitfire) and originally implemented by [acj](https://gist.github.com/acj) which can be found [here](https://gist.github.com/acj/6ae90aa1ebb8cad6b47b).
 
 ## License
 
